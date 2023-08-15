@@ -117,6 +117,16 @@ frame :: proc(mctx: ^mu.Context) {
         delete(fd)
     }
 
+    @(static) lastWindowFocus := true
+    if currentWindowFocus := md.is_window_focused(); currentWindowFocus != lastWindowFocus {
+        lastWindowFocus = currentWindowFocus
+        if currentWindowFocus {
+            md.set_target_framerate(60)
+        } else {
+            md.set_target_framerate(1)
+        }
+    }
+
     {
         mu.begin(mctx)
         defer mu.end(mctx)

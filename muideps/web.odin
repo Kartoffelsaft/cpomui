@@ -22,10 +22,12 @@ foreign cv {
     load_event_string_buffer :: proc(b: []byte) ---
     print_something          :: proc(s: string) ---
     set_loop_target          :: proc(t: proc "odin" ()) ---
+    js_set_target_framerate  :: proc(r: f64) ---
     js_text_width            :: proc(s: string) -> f64 ---
     js_text_height           :: proc() -> f64 ---
     js_get_width             :: proc() -> f64 ---
     js_get_height            :: proc() -> f64 ---
+    is_window_focused        :: proc() -> bool ---
 
     fill_canvas :: proc(color: string) ---
     fill_rect :: proc(x, y, w, h: f64, color: string) ---
@@ -45,7 +47,6 @@ request_new_event_string_buffer :: proc() {
     load_event_string_buffer(eventStringBuffer)
 }
 
-// putting this here means I don't have to pass it everywhere js side
 smctx: ^mu.Context = {}
 
 init :: proc() -> ^mu.Context {
@@ -87,6 +88,13 @@ init :: proc() -> ^mu.Context {
 
     return mctx
 }
+
+currentFramerate: f64 = 60
+set_target_framerate :: proc(framerate: f64) {
+    js_set_target_framerate(framerate)
+    currentFramerate = framerate
+}
+get_target_framerate :: proc() -> f64 { return currentFramerate }
 
 loop :: proc(frame: proc(^mu.Context), mctx: ^mu.Context) {
     @(static) sframe: proc(^mu.Context) = {}

@@ -19,6 +19,11 @@ init :: proc() -> ^mu.Context {
     return mctx
 }
 
+set_target_framerate :: proc(framerate: f64) {
+    rl.SetTargetFPS(cast(i32)framerate)
+}
+get_target_framerate :: proc() -> f64 { return cast(f64)rl.GetFPS() }
+
 loop :: proc(frame: proc(^mu.Context), mctx: ^mu.Context) {
     for !rl.WindowShouldClose() {
         frame(mctx)
@@ -34,6 +39,10 @@ text_width :: proc(f: mu.Font, s: string) -> i32 {
 }
 
 text_height :: proc(f: mu.Font) -> i32 {return TEXT_SIZE}
+
+is_window_focused :: proc() -> bool {
+    return rl.IsWindowFocused()
+}
 
 get_width  :: proc() -> i32 {return cast(i32)rl.GetScreenWidth()}
 get_height :: proc() -> i32 {return cast(i32)rl.GetScreenHeight()}

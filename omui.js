@@ -119,6 +119,9 @@ setTimeout(async function(){
         }
     }, 1000);
 
+    let loopId = -1;
+    let loopFn = -1;
+
     let obj = await WebAssembly.instantiateStreaming(fetch("omui.wasm"), {
         "canvas": { 
             memory: new WebAssembly.Memory({initial: 1, maximum: 9999, shared: true}),
@@ -161,8 +164,15 @@ setTimeout(async function(){
             get_return_string: (p, l) => {
                 wasmMemoryInterface.loadBytes(p, l).set(returnString)
             },
+            js_set_target_framerate: (framerate) => {
+                if (loopFn !== -1) {
+                    clearInterval(loopId);
+                    setInterval(wasmMemoryInterface.exports.call_fn, 1000 / framerate, loopFn)
+                }
+            },
             set_loop_target: (t) => {
-                setInterval(wasmMemoryInterface.exports.call_fn, 1000 / 60, t);
+                loopFn = t
+                loopId = setInterval(wasmMemoryInterface.exports.call_fn, 1000 / 60, t);
             },
             js_text_width: (s, l) => {
                 const str = wasmMemoryInterface.loadString(s, l);
@@ -174,6 +184,7 @@ setTimeout(async function(){
             },
             js_get_width : () => {return canvas.width ;},
             js_get_height: () => {return canvas.height;},
+            is_window_focused: () => {return document.hasFocus()},
             fill_canvas: (color_s, color_l) => {
                 canvasCtx.fillStyle = wasmMemoryInterface.loadString(color_s, color_l);
                 canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
